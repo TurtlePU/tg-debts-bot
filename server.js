@@ -18,7 +18,7 @@ const startBot = (count) => (err, token) => {
         console.log('Successfully read from file. Token:');
         console.log(token);
 
-        const Bot = require('lib/bot.js')(require('node-telegram-bot-api'));
+        const Bot = require('./lib/bot')(require('node-telegram-bot-api'));
         var bot = new Bot(token);
     }
 }
