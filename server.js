@@ -20,6 +20,16 @@ const startBot = (count) => (err, token) => {
 
         const Bot = require('./lib/bot')(require('node-telegram-bot-api'));
         var bot = new Bot(token);
+
+        let db_url = process.env.DATABASE_URL;
+
+        console.log('DATABASE_URL:');
+        console.log(db_url);
+
+        const { Client } = require('./lib/db-wrapper')(require('pg'));
+        var client = new Client(db_url);
+
+        bot.setDataBase(client);
     }
 }
 
