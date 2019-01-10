@@ -29,7 +29,11 @@ const startBot = (count) => (err, token) => {
         const { PGClient } = require('pg');
         const Client = require('./lib/db-wrapper')(PGClient);
 
-        Client.makeWrapper(db_url).then(client => bot.setDataBase(client));
+        Client.makeWrapper(db_url)
+        .then(
+            client => bot.setDataBase(client),
+            error => console.log(error)
+        );
     }
 }
 
