@@ -26,8 +26,9 @@ const startBot = (count) => (err, token) => {
         console.log('DATABASE_URL:');
         console.log(db_url);
 
-        const { PGClient } = require('pg');
-        const Client = require('./lib/db-wrapper')(PGClient);
+        const PGClient = require('pg').Client;
+        const WrapperFactory = require('./lib/db-wrapper');
+        const Client = new WrapperFactory(PGClient);
 
         Client.makeWrapper(db_url)
         .then(
