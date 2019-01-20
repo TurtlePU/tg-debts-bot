@@ -1,20 +1,26 @@
-const http = require('http');
+const http    = require('http');
+const BaseBot = require('node-telegram-bot-api');
+const PostGre = require('pg');
 
-const server = 'tg-debts-bot.herokuapp.com:443';
+const BotFactory   = require('./lib/bot');
+const DBCliFactory = require('./lib/db-wrapper');
 
 const token  = process.env.TG_BOT_TOKEN;
-console.log('TG_BOT_TOKEN:', token);
-
-const Bot = require('./lib/bot')(require('node-telegram-bot-api'));
-var bot = new Bot(token, 'https://' + server);
-
+const url    = process.env.APP_URL;
+const port   = process.env.PORT;
 const db_url = process.env.DATABASE_URL;
+
+console.log('TG_BOT_TOKEN:', token);
+console.log('APP_URL:', url);
+console.log('PORT:', port);
 console.log('DATABASE_URL:', db_url);
 
-const WrapperFactory = require('./lib/db-wrapper');
-const Client = new WrapperFactory(require('pg').Client);
+const Client = new DBCliFactory(PostGre.Client);
 Client.makeWrapper(db_url)
     .then(client => {
+        const Bot = BotFactory(BaseBot);
+        var bot = new Bot(token, 'https://' + url, port);
+
         bot.setDataBase(client);
 
         // keeps server awake
