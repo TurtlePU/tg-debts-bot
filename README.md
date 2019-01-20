@@ -1,4 +1,5 @@
 # Debts bot
 
 Бот для Телеграм. Держит в курсе по долгам.
-TODO доступен [здесь](https://app.asana.com/0/996894027067686/list "Asana project")
+
+TODO доступен [здесь](https://trello.com/b/wN834ZGE/debt-bot "Trello desk").
