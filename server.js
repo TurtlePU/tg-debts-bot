@@ -11,7 +11,8 @@ var bot = new Bot(token, server);
 const db_url = process.env.DATABASE_URL;
 console.log('DATABASE_URL:', db_url);
 
-const Client = require('./lib/db-wrapper')(require('pg').Client);
+const WrapperFactory = require('./lib/db-wrapper');
+const Client = new WrapperFactory(require('pg').Client);
 Client.makeWrapper(db_url)
     .then(client => {
         bot.setDataBase(client);
