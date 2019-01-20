@@ -1,4 +1,5 @@
 const fs = require('fs');
+const http = require('http');
 
 const RETRY_ATTEMPTS = 1;
 const retry = (count) => fs.readFile('private/token', startBot(count));
@@ -18,8 +19,10 @@ const startBot = (count) => (err, token) => {
         console.log('Successfully read from file. Token:');
         console.log(token);
 
+        const server = `https://tg-debts-bot.herokuapp.com:443`;
+
         const Bot = require('./lib/bot')(require('node-telegram-bot-api'));
-        var bot = new Bot(token);
+        var bot = new Bot(token, server);
 
         let db_url = process.env.DATABASE_URL;
 
@@ -31,7 +34,14 @@ const startBot = (count) => (err, token) => {
 
         Client.makeWrapper(db_url)
         .then(
-            client => bot.setDataBase(client),
+            client => {
+                bot.setDataBase(client);
+
+                // keeps server awake
+                setInterval(() => {
+                    http.get(server);
+                }, 30 * 60 * 1000);  // every 30 minutes
+            },
             error => console.log(error)
         );
     }
