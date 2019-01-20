@@ -28,7 +28,7 @@ Client.makeWrapper(db_url)
 
         // keeps server awake
         setInterval(() => {
-            http.get('http://' + server);
+            http.get('http://' + url);
         }, 10 * 60 * 1000);  // every 10 minutes
     })
     .catch(error => {
