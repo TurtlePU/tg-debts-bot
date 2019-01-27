@@ -20,8 +20,7 @@ console.log(
     '\nDATABASE_URL :', db_url,
     '\nBOT_NAME     :', name,
     '\nCIPHER_KEY   :', cipher_key,
-    '\nCIPHER_IV    :', cipher_iv,
-    '\n'
+    '\nCIPHER_IV    :', cipher_iv
 );
 
 const client = new DBClient(db_url);
@@ -40,7 +39,7 @@ client.start()
         bot.start();
     })
     .catch(error => {
-        console.log('\n', error, '\n');
+        console.log('\n', error);
     });
 
 // keeps server awake
