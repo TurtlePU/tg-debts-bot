@@ -1,17 +1,17 @@
 const http = require('http');
 
-const Bot      = require('./lib/bot'),
-      DBClient = require('./lib/db-wrapper'),
-      Cipher   = require('./lib/cipher');
+const Bot      = require('./lib/bot');
+const DBClient = require('./lib/db-wrapper');
+const Cipher   = require('./lib/cipher');
 
-const token  = process.env.TG_BOT_TOKEN,
-      url    = process.env.APP_URL,
-      port   = process.env.PORT,
-      db_url = process.env.DATABASE_URL,
-      name   = process.env.BOT_NAME;
+const token  = process.env.TG_BOT_TOKEN;
+const url    = process.env.APP_URL;
+const port   = process.env.PORT;
+const db_url = process.env.DATABASE_URL;
+const name   = process.env.BOT_NAME;
 
-const cipher_key = process.env.CIPHER_KEY,
-      cipher_iv  = process.env.CIPHER_IV;
+const cipher_key = process.env.CIPHER_KEY;
+const cipher_iv  = process.env.CIPHER_IV;
 
 console.log(
     '\nTG_BOT_TOKEN :', token,
