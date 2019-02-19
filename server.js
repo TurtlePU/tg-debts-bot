@@ -27,16 +27,17 @@ const client = new DBClient(db_url);
 
 try {
     await client.start();
+    const cipher = new Cipher({
+        key : cipher_key,
+        iv  : cipher_iv
+    });
     const bot = new Bot({
         token    : token,
         url      : 'https://' + url,
         port     : port,
         name     : name,
         dataBase : client,
-        cipher   : new Cipher({
-            key : cipher_key,
-            iv  : cipher_iv
-        })
+        cipher   : cipher
     });
     bot.start();
 } catch(error) {
