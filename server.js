@@ -8,7 +8,7 @@ const token  = process.env.TG_BOT_TOKEN || 'your token';
 const url    = process.env.APP_URL      || 'server url';
 const port   = process.env.PORT         || '8080';
 const db_url = process.env.DATABASE_URL || 'PostgreSQL database url';
-const name   = process.env.BOT_NAME     || 'debt_bot (goes after "at" sign)';
+const name   = process.env.BOT_NAME     || 'debt_bot'; // goes after @, between 5 & 32 chars long
 
 const cipher_key = process.env.CIPHER_KEY || 'exactly 24 symbols long.';
 const cipher_iv  = process.env.CIPHER_IV  || 'exactly 16 chars';
