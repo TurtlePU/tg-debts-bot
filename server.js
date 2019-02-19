@@ -24,23 +24,27 @@ console.log(
 );
 
 const client = new DBClient(db_url);
-client.start()
-    .then(() => {
-        const bot = new Bot(token, 'https://' + url, port);
 
-        bot.setName(name);
-        bot.setDataBase(client);
+try
+{
+    await client.start();
 
-        bot.setCipher(new Cipher({
+    const bot = new Bot(token, 'https://' + url, port);
+    bot.setName(name);
+    bot.setDataBase(client);
+    bot.setCipher(
+        new Cipher({
             key : cipher_key,
             iv  : cipher_iv
-        }));
+        })
+    );
 
-        bot.start();
-    })
-    .catch(error => {
-        console.log('\n', error);
-    });
+    bot.start();
+}
+catch(error)
+{
+    console.log(error);
+}
 
 // keeps server awake
 setInterval(() => {
