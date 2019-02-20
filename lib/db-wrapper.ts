@@ -1,7 +1,7 @@
 import { Client, QueryConfig } from 'pg';
-import './common_types';
+import { BotPostgreClient, Offer, StatsRow } from './common_types';
 
-export = class Wrapper extends Client {
+export = class MyClient extends Client implements BotPostgreClient {
     constructor(DB_URL : string) {
         super({
             connectionString: DB_URL,

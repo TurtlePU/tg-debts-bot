@@ -1,11 +1,11 @@
 import crypto from 'crypto';
-import './common_types';
+import { OfferTemplate, OfferOption, OfferEncoder } from './common_types';
 
 const algo = 'aes-192-cbc';
 const from = 'utf8';
 const to   = 'base64';
 
-export = class Cipher {
+export = class Cipher implements OfferEncoder {
     constructor(options : { key : string, iv : string }) {
         this.key = options.key;
         this.iv  = options.iv;

@@ -1,4 +1,4 @@
-import './common_types'
+import { StatsRow } from './common_types'
 
 export = {
     lineReduce: function(

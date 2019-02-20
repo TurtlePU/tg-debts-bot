@@ -1,5 +1,7 @@
-import './common_types';
+import { StatsRow, Offer } from './common_types';
 import util = require('./util');
+
+import Bot = require('node-telegram-bot-api');
 
 export = {
     start: {
@@ -35,16 +37,20 @@ export = {
                 + `Я — Долгер (@${name}), записная книжка долгов.\n`
                 + `Ещё увидимся?`;
         },
-        keyboard: {
-            reply_markup: JSON.stringify({
-                inline_keyboard: [[{
-                    text: 'Поделиться 🤖',
-                    switch_inline_query: ''
-                }]]
-            })
-        }, // type from n-t-b-a
+        keyboard: function() : Bot.SendMessageOptions {
+            return {
+                reply_markup: {
+                    inline_keyboard: [[{
+                        text: 'Поделиться 🤖',
+                        switch_inline_query: ''
+                    }]]
+                }
+            };
+        }, 
         article: {
-            title: 'Поделиться 🤖'
+            title: function() : string {
+                return 'Поделиться 🤖';
+            }
         }
     },
     stats: {
@@ -58,15 +64,19 @@ export = {
                 + (debts.length && owes.length ? '\n\n' : '')
                 + util.lineReduce(owes, 'Вам должны:\n');
         },
-        callback_answer_text: 'Обновлено.',
-        keyboard: {
-            reply_markup: JSON.stringify({
-                inline_keyboard: [[{
-                    text: 'Обновить 🔄',
-                    callback_data: 'update'
-                }]]
-            })
-        } // type from n-t-b-a
+        callback_answer_text: function() : string {
+            return 'Обновлено.';
+        },
+        keyboard: function() : Bot.SendMessageOptions {
+            return {
+                reply_markup: {
+                    inline_keyboard: [[{
+                        text: 'Обновить 🔄',
+                        callback_data: 'update'
+                    }]]
+                }
+            };
+        }
     },
     debt: {
         text: function(
@@ -86,17 +96,19 @@ export = {
         keyboard: function(
             text   : string,
             amount : number
-        ) {
+        ) : Bot.SendMessageOptions {
             return {
-                reply_markup: JSON.stringify({
+                reply_markup: {
                     inline_keyboard: [[{
                         text: (amount < 0 ? 'Предложить' : 'Попросить') + ' 💰',
                         switch_inline_query: `${amount}${text || ''}`
                     }]]
-                })
+                }
             };
-        }, // return type from n-t-b-a
-        amount_overflow_text: '❌ Размер долга нереально большой ❌',
+        },
+        amount_overflow_text: function() : string {
+            return '❌ Размер долга нереально большой ❌';
+        },
         article: {
             title: function (amount : number) : string {
                 return `${amount > 0 ? `Попросить` : `Предложить`} ${Math.abs(amount)}`;
@@ -104,14 +116,14 @@ export = {
             keyboard: function (
                 accept : string,
                 refuse : string
-            ) {
+            ) : Bot.InlineKeyboardMarkup {
                 return {
                     inline_keyboard: [[
                         { text: 'Ок 🌝', callback_data: accept },
                         { text: 'Не 🌚', callback_data: refuse }
                     ]]
                 };
-            } // return type from n-t-b-a
+            }
         }
     },
     deal: {
@@ -126,7 +138,9 @@ export = {
 
             return `Предложение ${arg1} было ${arg2} @${offer.to}. (${offer.from})`;
         },
-        self_accept_text: `Нельзя должать себе`,
+        self_accept_text: function() : string {
+            return 'Нельзя должать себе';
+        },
         cancel_text: function (owner : string) : string {
             return `Отменено @${owner}`;
         }
