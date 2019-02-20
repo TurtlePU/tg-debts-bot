@@ -2,11 +2,11 @@
   "name": "tg-debts-bot",
   "version": "0.2.0",
   "description": "tg bot which holds you in course of your debts",
-  "main": "dist/server.js",
+  "main": "server.js",
   "scripts": {
     "postinstall": "tsc",
-    "start": "node dist/server.js",
-    "watch-node": "nodemon dist/server.js",
+    "start": "node server.js",
+    "watch-node": "nodemon server.js",
     "watch-ts": "tsc -w",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
