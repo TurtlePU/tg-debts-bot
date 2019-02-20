@@ -23,26 +23,29 @@ console.log(
     '\nCIPHER_IV    :', cipher_iv
 );
 
-const client = new DBClient(db_url);
-
-try {
-    await client.start();
-    const cipher = new Cipher({
-        key : cipher_key,
-        iv  : cipher_iv
-    });
-    const bot = new Bot({
-        token    : token,
-        url      : 'https://' + url,
-        port     : port,
-        name     : name,
-        dataBase : client,
-        cipher   : cipher
-    });
-    bot.start();
-} catch(error) {
-    console.log(error);
+async function init() {
+    try {
+        const client = new DBClient(db_url);
+        await client.start();
+        const cipher = new Cipher({
+            key : cipher_key,
+            iv  : cipher_iv
+        });
+        const bot = new Bot({
+            token    : token,
+            url      : 'https://' + url,
+            port     : port,
+            name     : name,
+            dataBase : client,
+            cipher   : cipher
+        });
+        bot.start();
+    } catch(error) {
+        console.log(error);
+    }
 }
+
+await init();
 
 // keeps server awake
 setInterval(() => {
