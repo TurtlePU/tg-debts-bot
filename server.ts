@@ -1,8 +1,8 @@
-const http = require('http');
+import http from 'http';
 
-const Bot      = require('./lib/bot');
-const DBClient = require('./lib/db-wrapper');
-const Cipher   = require('./lib/cipher');
+import Bot      from './lib/bot';
+import DBClient from './lib/db-wrapper';
+import Cipher   from './lib/cipher';
 
 const token  = process.env.TG_BOT_TOKEN || 'your token';
 const url    = process.env.APP_URL      || 'server url';
@@ -34,7 +34,7 @@ async function init() {
         const bot = new Bot({
             token    : token,
             url      : 'https://' + url,
-            port     : port,
+            port     : parseInt(port),
             name     : name,
             dataBase : client,
             cipher   : cipher
@@ -43,9 +43,9 @@ async function init() {
     } catch(error) {
         console.log(error);
     }
-}
+};
 
-await init();
+init();
 
 // keeps server awake
 setInterval(() => {
