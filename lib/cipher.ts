@@ -2,8 +2,8 @@ import crypto from 'crypto';
 import './common_types';
 
 const algo = 'aes-192-cbc';
-const from = 'utf-8';
-const to   = 'binary';
+const from = 'utf8';
+const to   = 'base64';
 
 export = class Cipher {
     constructor(options : { key : string, iv : string }) {
@@ -28,9 +28,7 @@ export = class Cipher {
 
     decode(encoded : string) : OfferOption {
         let decipher = crypto.createDecipheriv(algo, this.key, this.iv);
-        let decoded = (decipher.update(encoded, to, from)
-            + decipher.final(from))
-            .split(' ');
+        let decoded = (decipher.update(encoded, to, from) + decipher.final(from)).split(' ');
         console.log('\ndecoded data :', decoded);
         return {
             from   : decoded[0],
