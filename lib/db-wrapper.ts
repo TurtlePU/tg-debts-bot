@@ -1,14 +1,15 @@
-const BaseWrapper = require('pg').Client;
+import { Client, QueryConfig } from 'pg';
+import './common_types';
 
-class Wrapper extends BaseWrapper {
-    constructor(DB_URL) {
+export = class Wrapper extends Client {
+    constructor(DB_URL : string) {
         super({
             connectionString: DB_URL,
             ssl: true
         });
     }
 
-    async unitQuery(sql) {
+    async unitQuery(sql : string | QueryConfig) : Promise<any> {
         let table = await this.query(sql);
         if (table.rows.length)
             return table.rows[0].result;
@@ -16,7 +17,7 @@ class Wrapper extends BaseWrapper {
             return 0;
     }
 
-    async start() {
+    async start() : Promise<this> {
         await this.connect();
         console.log('\nSuccessfully connected to database');
         await this.query(`
@@ -29,7 +30,7 @@ class Wrapper extends BaseWrapper {
         return this;
     }
 
-    async tryMake(name) {
+    async tryMake(name : string) : Promise<void> {
         await this.query(`
             create table if not exists ${name}(
                 to_name varchar(32) primary key,
@@ -39,7 +40,7 @@ class Wrapper extends BaseWrapper {
         console.log(`\nCreated table ${name} if not exists`);
     }
 
-    async saveDebt(offer) {
+    async saveDebt(offer : Offer) : Promise<void> {
         let from   = offer.from,
             amount = offer.amount,
             to     = offer.to;
@@ -50,7 +51,11 @@ class Wrapper extends BaseWrapper {
         ]);
     }
 
-    async insert(from, amount, to) {
+    async insert(
+        from   : string,
+        amount : number,
+        to     : string
+    ) : Promise<void> {
         await this.tryMake(from);
         let debtExists = await this.unitQuery(`
             select exists(
@@ -59,16 +64,15 @@ class Wrapper extends BaseWrapper {
                 where to_name = '${to}'
             ) as result`
         );
-        amount = new Number(amount);
         if (debtExists) {
             console.log('\nDebt exists');
-            let oldAmount = new Number(await this.unitQuery(`
+            let oldAmount = parseInt(await this.unitQuery(`
                 select amount
                 as result
                 from ${from}
                 where to_name = '${to}'`
             ));
-            console.log('\n', amounts(amount, oldAmount));
+            console.log('\n', this.amounts(amount, oldAmount));
             if (oldAmount + amount == 0) {
                 console.log('\nDeleting debt...');
                 await this.query(`
@@ -90,7 +94,7 @@ class Wrapper extends BaseWrapper {
                 console.log('\nUpdating debt...');
                 await this.query(`
                     update ${from}
-                    set amount = ${old_amount + amount}
+                    set amount = ${oldAmount + amount}
                     where to_name = '${to}'`
                 );
             }
@@ -105,21 +109,27 @@ class Wrapper extends BaseWrapper {
         }
     };
 
-    amounts(amount, old_amount) {
+    amounts(
+        amount     : number,
+        old_amount : number
+    ) : string {
         return ''
             + `amount     : ${amount}\n`
             + `old_amount : ${old_amount}\n`
             + `sum        : ${amount + old_amount}`;
     };
 
-    async getStats(name) {
+    async getStats(name : string) : Promise<StatsRow[]> {
         await this.tryMake(name);
         let table = (await this.query(`select * from ${name}`)).rows;
         console.log('\nGot stats');
         return table;
     }
 
-    async setState(chatID, state) {
+    async setState(
+        chatID : number,
+        state  : number
+    ) : Promise<void> {
         await this.query(`
             insert into stte
             values (${chatID}, ${state})
@@ -128,7 +138,10 @@ class Wrapper extends BaseWrapper {
         );
     }
 
-    async checkState(chatID, reqState) {
+    async checkState(
+        chatID   : number,
+        reqState : number
+    ) : Promise<boolean> {
         let hasState = await this.unitQuery(`
             select exists(
                 select *
@@ -147,5 +160,3 @@ class Wrapper extends BaseWrapper {
         } else return false;
     }
 };
-
-if (module) module.exports = Wrapper;

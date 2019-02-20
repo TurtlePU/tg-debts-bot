@@ -1,5 +1,10 @@
-const util = {
-    lineReduce: function (table, seed) {
+import './common_types'
+
+export = {
+    lineReduce: function(
+        table : StatsRow[],
+        seed  : string
+    ) : string {
         console.log(table, seed);
         if (!table.length)
             return '';
@@ -8,12 +13,11 @@ const util = {
                 + `\n@${line.to_name}: ${line.amount}`;
         }, seed);
     },
-    lineAbs: function (line) {
+
+    lineAbs: function(line : StatsRow) : StatsRow {
         return {
-            to_name: line.to_name,
-            amount: Math.abs(line.amount)
+            to_name : line.to_name,
+            amount  : Math.abs(line.amount)
         };
     }
 };
-
-if (module) module.exports = util;

@@ -1,8 +1,9 @@
-const util = require('./util');
+import './common_types';
+import util = require('./util');
 
-const UI = {
+export = {
     start: {
-        text: function () {
+        text: function() : string {
             return `Привет! 👋\n`
                 + `Я — записная книжка долгов.\n\n`
                 + `💰 Чтобы попросить в долг, напиши сумму.\n\n`
@@ -12,7 +13,7 @@ const UI = {
         }
     },
     help: {
-        text: function (name) {
+        text: function (name : string) : string {
             return ''
                 + `Команды ([текст] — по вкусу):\n\n`
                 + ` N [текст] — попросить N 💰.\n`
@@ -28,7 +29,7 @@ const UI = {
         }
     },
     share: {
-        text: function (name) {
+        text: function (name : string) : string {
             return ''
                 + `Привет! 👋\n`
                 + `Я — Долгер (@${name}), записная книжка долгов.\n`
@@ -41,16 +42,17 @@ const UI = {
                     switch_inline_query: ''
                 }]]
             })
-        },
+        }, // type from n-t-b-a
         article: {
             title: 'Поделиться 🤖'
         }
     },
     stats: {
-        text: function (table) {
+        text: function (table : StatsRow[]) : string {
             if (!table.length)
                 return 'Долгов нет 👏';
-            let debts = table.filter(debt => debt.amount > 0), owes = table.filter(debt => debt.amount < 0).map(util.lineAbs);
+            let debts = table.filter(debt => debt.amount > 0);
+            let owes = table.filter(debt => debt.amount < 0).map(util.lineAbs);
             return ''
                 + util.lineReduce(debts, 'Вы должны:\n')
                 + (debts.length && owes.length ? '\n\n' : '')
@@ -64,21 +66,27 @@ const UI = {
                     callback_data: 'update'
                 }]]
             })
-        }
+        } // type from n-t-b-a
     },
     debt: {
-        text: function (text, amount, to) {
+        text: function(
+            text   : string,
+            amount : number,
+            to     : string
+        ) : string {
             if (text && (text.length > 1)) {
                 return text.substr(1)
                     + `\n\n`
                     + `‼️ Количество: ${amount} ‼️`;
-            }
-            else {
+            } else {
                 return `Я ${amount > 0 ? 'хочу' : 'даю'}`
                     + ` ${Math.abs(amount)} (${to})`;
             }
         },
-        keyboard: function (text, amount) {
+        keyboard: function(
+            text   : string,
+            amount : number
+        ) {
             return {
                 reply_markup: JSON.stringify({
                     inline_keyboard: [[{
@@ -87,33 +95,40 @@ const UI = {
                     }]]
                 })
             };
-        },
+        }, // return type from n-t-b-a
         amount_overflow_text: '❌ Размер долга нереально большой ❌',
         article: {
-            title: function (amount) {
+            title: function (amount : number) : string {
                 return `${amount > 0 ? `Попросить` : `Предложить`} ${Math.abs(amount)}`;
             },
-            keyboard: function (accept, refuse) {
+            keyboard: function (
+                accept : string,
+                refuse : string
+            ) {
                 return {
                     inline_keyboard: [[
                         { text: 'Ок 🌝', callback_data: accept },
                         { text: 'Не 🌚', callback_data: refuse }
                     ]]
                 };
-            }
+            } // return type from n-t-b-a
         }
     },
     deal: {
-        text: function (offer) {
-            let from = offer.from, amount = offer.amount, to = offer.to, accept = offer.accept;
-            let arg1 = amount > 0 ? `долга (кол-во: ${amount})` : -amount, arg2 = accept ? `принято` : `отвергнуто`;
-            return `Предложение ${arg1} было ${arg2} @${to}. (${from})`;
+        text: function (offer : Offer) : string {
+            let arg1 = offer.amount > 0
+                    ? `долга (кол-во: ${offer.amount})`
+                    : -offer.amount;
+
+            let arg2 = offer.accept
+                    ? `принято`
+                    : `отвергнуто`;
+
+            return `Предложение ${arg1} было ${arg2} @${offer.to}. (${offer.from})`;
         },
         self_accept_text: `Нельзя должать себе`,
-        cancel_text: function (owner) {
+        cancel_text: function (owner : string) : string {
             return `Отменено @${owner}`;
         }
     }
 };
-
-if (module) module.exports = UI;
