@@ -23,5 +23,10 @@
   "dependencies": {
     "node-telegram-bot-api": "^0.30.0",
     "pg": "^7.7.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.10",
+    "tslint": "^5.12.1",
+    "typescript": "^3.3.3"
   }
 }
