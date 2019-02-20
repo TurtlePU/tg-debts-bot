@@ -4,11 +4,14 @@ interface StatsRow {
 };
 
 interface OfferTemplate {
-    from   : string,
-    amount : number
+    from    : string,
+    amount  : number
 };
 
-interface Offer extends OfferTemplate {
-    to : string,
-    accept? : boolean
+interface OfferOption extends OfferTemplate {
+    accept : boolean
+};
+
+interface Offer extends OfferOption {
+    to : string
 };
