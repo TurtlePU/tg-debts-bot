@@ -5,7 +5,7 @@ const algo = 'aes-192-cbc';
 const from = 'utf8';
 const to   = 'base64';
 
-export = class Cipher implements OfferEncoder {
+export default class Cipher implements OfferEncoder {
     __key : string;
     __iv  : string;
 

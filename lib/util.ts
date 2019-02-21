@@ -1,6 +1,6 @@
 import { StatsRow } from './common_types'
 
-export = {
+export default {
     lineReduce: function(
         table : StatsRow[],
         seed  : string

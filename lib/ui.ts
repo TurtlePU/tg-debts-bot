@@ -1,9 +1,9 @@
 import { StatsRow, Offer } from './common_types';
-import util = require('./util');
+import util from './util';
 
-import Bot = require('node-telegram-bot-api');
+import Bot from 'node-telegram-bot-api';
 
-export = {
+export default {
     start: {
         text: function() : string {
             return `Привет! 👋\n`
