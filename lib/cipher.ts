@@ -6,15 +6,18 @@ const from = 'utf8';
 const to   = 'base64';
 
 export = class Cipher implements OfferEncoder {
+    __key : string;
+    __iv  : string;
+
     constructor(options : { key : string, iv : string }) {
-        this.key = options.key;
-        this.iv  = options.iv;
+        this.__key = options.key;
+        this.__iv  = options.iv;
     }
 
-    get key() { return this.key; }
+    get key() { return this.__key; }
     set key(_) { throw new Error('key cannot be changed'); }
 
-    get iv() { return this.iv; }
+    get iv() { return this.__iv; }
     set iv(_) { throw new Error('iv cannot be changed'); }
 
     encode(
