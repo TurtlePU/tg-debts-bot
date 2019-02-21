@@ -14,23 +14,20 @@ export default class Cipher implements OfferEncoder {
         this.__iv  = options.iv;
     }
 
-    get key() { return this.__key; }
-    set key(_) { throw new Error('key cannot be changed'); }
-
-    get iv() { return this.__iv; }
-    set iv(_) { throw new Error('iv cannot be changed'); }
+    key() : string { return this.__key; }
+    iv()  : string { return this.__iv; }
 
     encode(
         offer  : OfferTemplate,
         accept : boolean
     ) : string {
         let source = `${offer.from} ${offer.amount} ${accept ? 1 : 0}`;
-        let cipher = crypto.createCipheriv(algo, this.key, this.iv);
+        let cipher = crypto.createCipheriv(algo, this.key(), this.iv());
         return cipher.update(source, from, to) + cipher.final(to);
     }
 
     decode(encoded : string) : OfferOption {
-        let decipher = crypto.createDecipheriv(algo, this.key, this.iv);
+        let decipher = crypto.createDecipheriv(algo, this.key(), this.iv());
         let decoded = (decipher.update(encoded, to, from) + decipher.final(from)).split(' ');
         console.log('\ndecoded data :', decoded);
         return {
