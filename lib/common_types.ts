@@ -17,6 +17,7 @@ export interface StatsRow {
 
 export interface BotPostgreClient extends EventEmitter {
     start(): Promise<this>,
+    restartOffers(): Promise<void>,
     saveOffer(id: string, offer: OfferTemplate): Promise<void>,
     getOffer(id: string): Promise<OfferTemplate>,
     deleteOffer(id: string): Promise<boolean>,
@@ -34,5 +35,5 @@ export interface BotOptions {
 };
 
 export interface BotType {
-    start(url: string): void
+    start(url: string): Promise<void>
 };

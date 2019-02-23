@@ -27,7 +27,7 @@ async function init() {
             name:  name,
             dataBase: client
         });
-        bot.start('https://' + url);
+        await bot.start('https://' + url);
     } catch(error) {
         console.log(error);
     }

@@ -49,7 +49,7 @@ export default class DebtBot extends TelegramBot implements BotType {
         this.dataBase = options.dataBase;
     }
 
-    start(url: string): void {
+    async start(url: string): Promise<void> {
         this.onText(/\/start/, this.onStart);
         this.onText(/\/help/, this.onHelp);
         this.onText(/\/share/, this.onShare);
@@ -62,10 +62,11 @@ export default class DebtBot extends TelegramBot implements BotType {
         this.dataBase.on('expired_offer', (id, offer) => {
             this.onExpiredOffer(id, offer)
         });
+        await this.dataBase.restartOffers();
 
         this.on('callback_query', this.onButton);
 
-        this.setWebHook(`${url}/bot${this.token}`);
+        await this.setWebHook(`${url}/bot${this.token}`);
     }
 
     async onStart(msg: TelegramBot.Message): Promise<void> {
