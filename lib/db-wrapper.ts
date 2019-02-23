@@ -50,13 +50,13 @@ export default class MyClient extends Client implements BotPostgreClient {
             )`
         );
         console.log('saved offer:', offer, '\non id =', id);
-        setTimeout(async function() {
+        setTimeout(async () => {
             let deleted = await this.deleteOffer(id);
             if (deleted) {
                 console.log('offer expired:', offer, '\non id =', id);
                 this.emit('expired_offer', id, offer);
             }
-        }.bind(this), offerExpire);
+        }, offerExpire);
     }
 
     async getOffer(id: string): Promise<OfferTemplate> {
