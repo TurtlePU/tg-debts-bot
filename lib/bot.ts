@@ -288,9 +288,9 @@ export default class DebtBot extends TelegramBot implements BotType {
         }
     }
 
-    async onExpiredOffer(id: string): Promise<void> {
+    async onExpiredOffer(id: string, offerTemplate : OfferTemplate): Promise<void> {
         await this.editMessageText(
-            UI.deal.expire_text(),
+            UI.deal.expire_text(offerTemplate),
             { inline_message_id: id }
         );
     }
