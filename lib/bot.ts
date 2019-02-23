@@ -17,30 +17,30 @@ interface TextedOffer extends OfferTemplate {
 };
 
 function toOffer(
-    offerTemplate : OfferTemplate,
-    to : string,
-    accept : boolean
-) : Offer {
+    offerTemplate: OfferTemplate,
+    to: string,
+    accept: boolean
+): Offer {
     return {
-        from   : offerTemplate.from,
-        amount : offerTemplate.amount,
-        to     : to,
-        accept : accept
+        from:   offerTemplate.from,
+        amount: offerTemplate.amount,
+        to:     to,
+        accept: accept
     };
 }
 
 export default class DebtBot extends TelegramBot implements BotType {
-    token : string;
-    name  : string;
-    dataBase : BotPostgreClient;
+    token: string;
+    name:  string;
+    dataBase: BotPostgreClient;
 
-    constructor(options : BotOptions) {
+    constructor(options: BotOptions) {
         super(options.token, {
-            webHook : {
-                port : options.port,
-                key  : '',
-                cert : '',
-                pfx  : ''
+            webHook: {
+                port: options.port,
+                key:  '',
+                cert: '',
+                pfx:  ''
             }
         });
 
@@ -49,7 +49,7 @@ export default class DebtBot extends TelegramBot implements BotType {
         this.dataBase = options.dataBase;
     }
 
-    start(url : string) : void {
+    start(url: string): void {
         this.onText(/\/start/, this.onStart);
         this.onText(/\/help/, this.onHelp);
         this.onText(/\/share/, this.onShare);
@@ -59,14 +59,16 @@ export default class DebtBot extends TelegramBot implements BotType {
         this.on('inline_query', this.onInline);
         this.on('chosen_inline_result', this.onChosenInlineResult);
 
-        this.dataBase.on('expired_offer', (id, offer) => this.onExpiredOffer(id, offer));
+        this.dataBase.on('expired_offer', (id, offer) => {
+            this.onExpiredOffer(id, offer)
+        });
 
         this.on('callback_query', this.onButton);
 
         this.setWebHook(`${url}/bot${this.token}`);
     }
 
-    async onStart(msg : TelegramBot.Message) : Promise<void> {
+    async onStart(msg: TelegramBot.Message): Promise<void> {
         try {
             await this.sendMessage(
                 msg.chat.id,
@@ -77,7 +79,7 @@ export default class DebtBot extends TelegramBot implements BotType {
         }
     }
 
-    async onHelp(msg : TelegramBot.Message) : Promise<void> {
+    async onHelp(msg: TelegramBot.Message): Promise<void> {
         try {
             await this.sendMessage(
                 msg.chat.id,
@@ -88,7 +90,7 @@ export default class DebtBot extends TelegramBot implements BotType {
         }
     }
 
-    async onShare(msg : TelegramBot.Message) : Promise<void> {
+    async onShare(msg: TelegramBot.Message): Promise<void> {
         try {
             await this.sendMessage(
                 msg.chat.id,
@@ -100,15 +102,18 @@ export default class DebtBot extends TelegramBot implements BotType {
         }
     }
 
-    async inlineShare(query : TelegramBot.InlineQuery) : Promise<void> {
+    async inlineShare(query: TelegramBot.InlineQuery): Promise<void> {
         try {
-            await this.answerInlineQuery(query.id, [this.shareArticle()]);
+            await this.answerInlineQuery(
+                query.id,
+                [this.shareArticle()]
+            );
         } catch (error) {
             console.log(error);
         }
     }
 
-    shareArticle() : TelegramBot.InlineQueryResultArticle {
+    shareArticle(): TelegramBot.InlineQueryResultArticle {
         return {
             type: 'article',
             id: '0',
@@ -119,7 +124,7 @@ export default class DebtBot extends TelegramBot implements BotType {
         };
     }
 
-    async onStats(msg : TelegramBot.Message) : Promise<void> {
+    async onStats(msg: TelegramBot.Message): Promise<void> {
         try {
             let stats = await this.dataBase.getStats(msg.from.username);
             await this.sendMessage(
@@ -132,7 +137,7 @@ export default class DebtBot extends TelegramBot implements BotType {
         }
     }
 
-    async updateStats(query : TelegramBot.CallbackQuery) : Promise<void> {
+    async updateStats(query: TelegramBot.CallbackQuery): Promise<void> {
         try {
             let stats = await this.dataBase.getStats(query.from.username);
             await Promise.all([
@@ -155,14 +160,14 @@ export default class DebtBot extends TelegramBot implements BotType {
         }
     }
 
-    async onDebt(msg : TelegramBot.Message, match : RegExpExecArray) : Promise<void> {
+    async onDebt(msg: TelegramBot.Message, match: RegExpExecArray): Promise<void> {
         try {
             if (match[1].length < digitsLimit) {
                 let amount = Number(match[1]);
                 let text   = match[2];
                 await this.sendMessage(
                     msg.chat.id,
-                    UI.debt.text(text, amount, msg.from.username),
+                    UI.debt.text(text, amount),
                     UI.debt.keyboard(text, amount)
                 );
                 console.log('\namount :', amount);
@@ -177,16 +182,16 @@ export default class DebtBot extends TelegramBot implements BotType {
         }
     }
 
-    async inlineDebt(query : TelegramBot.InlineQuery) : Promise<void> {
+    async inlineDebt(query: TelegramBot.InlineQuery): Promise<void> {
         let match = query.query.match(debtRegexp);
         if (match[1].length >= digitsLimit) {
             await this.emptyInline(query);
             return;
         }
         let offer = {
-            from   : query.from.username,
-            amount : parseInt(match[1]),
-            text   : match[2]
+            from:   query.from.username,
+            amount: parseInt(match[1]),
+            text:   match[2]
         };
         let answer_main = this.debtArticle(offer);
         offer.amount = -offer.amount;
@@ -201,7 +206,7 @@ export default class DebtBot extends TelegramBot implements BotType {
         }
     }
 
-    debtArticle(offer : TextedOffer) : TelegramBot.InlineQueryResultArticle {
+    debtArticle(offer: TextedOffer): TelegramBot.InlineQueryResultArticle {
         return {
             type: 'article',
             id: (offer.amount > 0 ? '+' : '') + String(offer.amount),
@@ -209,15 +214,14 @@ export default class DebtBot extends TelegramBot implements BotType {
             input_message_content: {
                 message_text: UI.debt.text(
                     offer.text,
-                    offer.amount,
-                    offer.from
+                    offer.amount
                 )
             },
             reply_markup: UI.debt.article.keyboard()
         };
     }
 
-    async onOfferClick(query : TelegramBot.CallbackQuery) : Promise<void> {
+    async onOfferClick(query: TelegramBot.CallbackQuery): Promise<void> {
         try {
             let offer = toOffer(
                 await this.dataBase.getOffer(
@@ -226,7 +230,7 @@ export default class DebtBot extends TelegramBot implements BotType {
                 query.from.username,
                 query.data === '1'
             );
-            if (offer.to == offer.from) {
+            if (offer.to === offer.from) {
                 if (offer.accept) {
                     await this.answerCallbackQuery(
                         query.id,
@@ -257,16 +261,16 @@ export default class DebtBot extends TelegramBot implements BotType {
         }
     }
 
-    async onInline(query : TelegramBot.InlineQuery) : Promise<void> {
+    async onInline(query: TelegramBot.InlineQuery): Promise<void> {
         if (debtRegexp.test(query.query))
             await this.inlineDebt(query);
-        else if (query.query == 'share' || query.query == '')
+        else if (query.query === '')
             await this.inlineShare(query);
         else
             await this.emptyInline(query);
     }
 
-    async emptyInline(query : TelegramBot.InlineQuery) : Promise<void> {
+    async emptyInline(query: TelegramBot.InlineQuery): Promise<void> {
         try {
             await this.answerInlineQuery(query.id, []);
         } catch (error) {
@@ -274,13 +278,13 @@ export default class DebtBot extends TelegramBot implements BotType {
         }
     }
 
-    async onChosenInlineResult(result : TelegramBot.ChosenInlineResult) : Promise<void> {
+    async onChosenInlineResult(result: TelegramBot.ChosenInlineResult): Promise<void> {
         if (result.query != '') try {
             await this.dataBase.saveOffer(
                 result.inline_message_id,
                 {
-                    from   : result.from.username,
-                    amount : parseInt(result.result_id)
+                    from:   result.from.username,
+                    amount: parseInt(result.result_id)
                 }
             );
         } catch (error) {
@@ -288,15 +292,15 @@ export default class DebtBot extends TelegramBot implements BotType {
         }
     }
 
-    async onExpiredOffer(id: string, offerTemplate : OfferTemplate): Promise<void> {
+    async onExpiredOffer(id: string, offerTemplate: OfferTemplate): Promise<void> {
         await this.editMessageText(
             UI.deal.expire_text(offerTemplate),
             { inline_message_id: id }
         );
     }
 
-    async onButton(query : TelegramBot.CallbackQuery) : Promise<void> {
-        if (query.data == 'update')
+    async onButton(query: TelegramBot.CallbackQuery): Promise<void> {
+        if (query.data === 'update')
             await this.updateStats(query);
         else
             await this.onOfferClick(query);

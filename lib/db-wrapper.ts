@@ -130,7 +130,7 @@ export default class MyClient extends Client implements BotPostgreClient {
                 where to_name = '${to}'`
             ));
             console.log('\n', this.amounts(amount, oldAmount));
-            if (oldAmount + amount == 0) {
+            if (oldAmount + amount === 0) {
                 console.log('\nDeleting debt...');
                 await this.query(`
                     delete
@@ -213,7 +213,7 @@ export default class MyClient extends Client implements BotPostgreClient {
                 from stte
                 where id = ${chatID}`
             );
-            return new Number(state) == reqState;
+            return new Number(state) === reqState;
         } else return false;
     }
 };

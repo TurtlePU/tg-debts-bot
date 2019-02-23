@@ -81,16 +81,15 @@ export default {
     debt: {
         text: function(
             text:   string,
-            amount: number,
-            to:     string
+            amount: number
         ): string {
             if (text && (text.length > 1)) {
                 return text.substr(1)
                     + `\n\n`
-                    + `‼️ Количество: ${amount} ‼️`;
+                    + `‼️ ${amount > 0 ? 'хочет' : 'даёт'} ${Math.abs(amount)} ‼️`;
             } else {
                 return `Я ${amount > 0 ? 'хочу' : 'даю'}`
-                    + ` ${Math.abs(amount)} (${to})`;
+                    + ` ${Math.abs(amount)}`;
             }
         },
         keyboard: function(
@@ -128,12 +127,10 @@ export default {
             let arg1 = offer.amount > 0
                     ? `долга (кол-во: ${offer.amount})`
                     : -offer.amount;
-
             let arg2 = offer.accept
                     ? `принято`
                     : `отвергнуто`;
-
-            return `Предложение ${arg1} было ${arg2} @${offer.to}. (${offer.from})`;
+            return `Предложение ${arg1} было ${arg2} @${offer.to}.`;
         },
         self_accept_text: function(): string {
             return 'Нельзя должать себе';
