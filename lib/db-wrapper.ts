@@ -1,7 +1,7 @@
 import { Client, QueryConfig } from 'pg';
 import { BotPostgreClient, Offer, OfferTemplate, StatsRow } from './common_types';
 
-const offerExpire = 60 * 60 * 1000; // after hour
+const offerExpire = 3 * 1000; // after 3 sec
 
 export default class MyClient extends Client implements BotPostgreClient {
     constructor(DB_URL: string) {
@@ -50,7 +50,7 @@ export default class MyClient extends Client implements BotPostgreClient {
             )`
         );
         console.log('saved offer:', offer, '\non id =', id);
-        setTimeout(async () => {
+        setTimeout(async function() {
             let deleted = await this.deleteOffer(id);
             if (deleted) {
                 console.log('offer expired:', offer, '\non id =', id);
@@ -79,13 +79,13 @@ export default class MyClient extends Client implements BotPostgreClient {
 
     async deleteOffer(id: string): Promise<boolean> {
         console.log('trying to delete offer on id =', id);
-        let count = await this.unitQuery(`
+        let count = await this.query(`
             delete
             from offr
-            as result
             where id = '${id}'`
         );
-        return count !== 0;
+        console.log(count.rows[0]);
+        return count.rows[0] != 0;
     }
 
     async tryMake(name: string): Promise<void> {
