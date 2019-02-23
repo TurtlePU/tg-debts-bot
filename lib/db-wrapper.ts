@@ -1,7 +1,7 @@
 import { Client, QueryConfig } from 'pg';
 import { BotPostgreClient, Offer, OfferTemplate, StatsRow } from './common_types';
 
-const offerExpire = 3 * 1000; // after 3 sec
+const offerExpireTime = 3 * 1000; // after 3 sec
 
 export default class MyClient extends Client implements BotPostgreClient {
     constructor(DB_URL: string) {
@@ -56,7 +56,7 @@ export default class MyClient extends Client implements BotPostgreClient {
                 console.log('offer expired:', offer, '\non id =', id);
                 this.emit('expired_offer', id, offer);
             }
-        }, offerExpire);
+        }, offerExpireTime);
     }
 
     async getOffer(id: string): Promise<OfferTemplate> {
