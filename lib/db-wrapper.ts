@@ -84,7 +84,7 @@ export default class MyClient extends Client implements BotPostgreClient {
             from offr
             where id = '${id}'`
         );
-        console.log(count.rows[0]);
+        console.log(count);
         return count.rows[0] != 0;
     }
 
