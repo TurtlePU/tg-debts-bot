@@ -1,7 +1,7 @@
 import { Client, QueryConfig } from 'pg';
 import { BotPostgreClient, Offer, OfferTemplate, StatsRow } from './common_types';
 
-const offerExpireTime = 3 * 1000; // after 3 sec
+const offerExpireTime = 60 * 60 * 1000; // after 1 hour
 
 export default class MyClient extends Client implements BotPostgreClient {
     constructor(DB_URL: string) {
