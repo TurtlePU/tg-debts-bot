@@ -1,15 +1,17 @@
 import { Client, QueryConfig } from 'pg';
-import { BotPostgreClient, Offer, StatsRow } from './common_types';
+import { BotPostgreClient, Offer, OfferTemplate, StatsRow } from './common_types';
+
+const offerExpire = 60 * 60 * 1000; // after hour
 
 export default class MyClient extends Client implements BotPostgreClient {
-    constructor(DB_URL : string) {
+    constructor(DB_URL: string) {
         super({
             connectionString: DB_URL,
             ssl: true
         });
     }
 
-    async unitQuery(sql : string | QueryConfig) : Promise<any> {
+    async unitQuery(sql: string | QueryConfig): Promise<any> {
         let table = await this.query(sql);
         if (table.rows.length)
             return table.rows[0].result;
@@ -17,7 +19,7 @@ export default class MyClient extends Client implements BotPostgreClient {
             return 0;
     }
 
-    async start() : Promise<this> {
+    async start(): Promise<this> {
         await this.connect();
         console.log('\nSuccessfully connected to database');
         await this.query(`
@@ -27,10 +29,60 @@ export default class MyClient extends Client implements BotPostgreClient {
             )`
         );
         console.log('\nCreated table of states if not exists');
+        await this.query(`
+            create table if not exists offr(
+                id varchar(255) primary key,
+                from_name varchar(32),
+                amount bigint
+            )`
+        );
+        console.log('\nCreated table of offers if not exists');
         return this;
     }
 
-    async tryMake(name : string) : Promise<void> {
+    async saveOffer(id: string, offer: OfferTemplate): Promise<void> {
+        await this.query(`
+            insert into offr
+            values (
+                '${id}',
+                '${offer.from}',
+                ${offer.amount}
+            )`
+        );
+        setTimeout(async () => {
+            let deleted = await this.deleteOffer(id);
+            if (deleted)
+                this.emit('expired_offer', id);
+        }, offerExpire);
+    }
+
+    async getOffer(id: string): Promise<OfferTemplate> {
+        let query = await this.query(`
+            select *
+            from offr
+            where id = ${id}
+            limit 1`
+        );
+        if (query.rowCount === 0)
+            throw new Error(`Offer not found. ID = ${id}`);
+        let result = query.rows[0];
+        return {
+            from: result.from_name,
+            amount: result.amount
+        };
+    }
+
+    async deleteOffer(id: string): Promise<boolean> {
+        let count = await this.unitQuery(`
+            delete
+            from offr
+            as result
+            where id = ${id}`
+        );
+        return count !== 0;
+    }
+
+    async tryMake(name: string): Promise<void> {
         await this.query(`
             create table if not exists ${name}(
                 to_name varchar(32) primary key,
@@ -40,7 +92,7 @@ export default class MyClient extends Client implements BotPostgreClient {
         console.log(`\nCreated table ${name} if not exists`);
     }
 
-    async saveDebt(offer : Offer) : Promise<void> {
+    async saveDebt(offer: Offer): Promise<void> {
         let from   = offer.from,
             amount = offer.amount,
             to     = offer.to;
@@ -52,10 +104,10 @@ export default class MyClient extends Client implements BotPostgreClient {
     }
 
     async insert(
-        from   : string,
-        amount : number,
-        to     : string
-    ) : Promise<void> {
+        from:   string,
+        amount: number,
+        to:     string
+    ): Promise<void> {
         await this.tryMake(from);
         let debtExists = await this.unitQuery(`
             select exists(
@@ -110,16 +162,16 @@ export default class MyClient extends Client implements BotPostgreClient {
     };
 
     amounts(
-        amount     : number,
-        old_amount : number
-    ) : string {
+        amount:     number,
+        old_amount: number
+    ): string {
         return ''
             + `amount     : ${amount}\n`
             + `old_amount : ${old_amount}\n`
             + `sum        : ${amount + old_amount}`;
     };
 
-    async getStats(name : string) : Promise<StatsRow[]> {
+    async getStats(name: string): Promise<StatsRow[]> {
         await this.tryMake(name);
         let table = (await this.query(`select * from ${name}`)).rows;
         console.log('\nGot stats');
@@ -127,9 +179,9 @@ export default class MyClient extends Client implements BotPostgreClient {
     }
 
     async setState(
-        chatID : number,
-        state  : number
-    ) : Promise<void> {
+        chatID: number,
+        state:  number
+    ): Promise<void> {
         await this.query(`
             insert into stte
             values (${chatID}, ${state})
@@ -139,9 +191,9 @@ export default class MyClient extends Client implements BotPostgreClient {
     }
 
     async checkState(
-        chatID   : number,
-        reqState : number
-    ) : Promise<boolean> {
+        chatID:   number,
+        reqState: number
+    ): Promise<boolean> {
         let hasState = await this.unitQuery(`
             select exists(
                 select *
