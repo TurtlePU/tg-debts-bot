@@ -1,4 +1,4 @@
-import { StatsRow, Offer } from './common_types';
+import { StatsRow, Offer, OfferTemplate } from './common_types';
 import util from './util';
 
 import Bot from 'node-telegram-bot-api';
@@ -141,8 +141,8 @@ export default {
         cancel_text: function(owner: string): string {
             return `Отменено @${owner}`;
         },
-        expire_text: function(): string {
-            return 'Предложение истекло';
+        expire_text: function(offer: OfferTemplate): string {
+            return `Ожидание ${offer.amount} истекло`;
         }
     }
 };
