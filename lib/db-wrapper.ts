@@ -79,13 +79,12 @@ export default class MyClient extends Client implements BotPostgreClient {
 
     async deleteOffer(id: string): Promise<boolean> {
         console.log('trying to delete offer on id =', id);
-        let count = await this.query(`
+        let count = (await this.query(`
             delete
             from offr
             where id = '${id}'`
-        );
-        console.log(count);
-        return count.rows[0] != 0;
+        )).rowCount;
+        return count !== 0;
     }
 
     async tryMake(name: string): Promise<void> {
