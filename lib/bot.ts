@@ -8,30 +8,31 @@ import {
     BotType,
     BotOptions,
     BotPostgreClient,
-    OfferEncoder,
-    TextedOffer,
-    OfferOption,
-    Offer
+    Offer,
+    OfferTemplate
 } from './common_types';
 
-function toOffer(offerOption : OfferOption) : Offer {
+interface TextedOffer extends OfferTemplate {
+    text: string
+};
+
+function toOffer(
+    offerTemplate : OfferTemplate,
+    to : string,
+    accept : boolean
+) : Offer {
     return {
-        from   : offerOption.from,
-        amount : offerOption.amount,
-        accept : offerOption.accept,
-        to     : ''
+        from   : offerTemplate.from,
+        amount : offerTemplate.amount,
+        to     : to,
+        accept : accept
     };
 }
 
 export default class DebtBot extends TelegramBot implements BotType {
     token : string;
-    url   : string;
     name  : string;
     dataBase : BotPostgreClient;
-    cipher   : OfferEncoder;
-    articleID : number;
-
-    nextArticleID() : number { return this.articleID++; }
 
     constructor(options : BotOptions) {
         super(options.token, {
@@ -44,15 +45,11 @@ export default class DebtBot extends TelegramBot implements BotType {
         });
 
         this.token    = options.token;
-        this.url      = options.url;
         this.name     = options.name;
         this.dataBase = options.dataBase;
-        this.cipher   = options.cipher;
-
-        this.articleID = 0;
     }
 
-    start() {
+    start(url : string) : void {
         this.onText(/\/start/, this.onStart);
         this.onText(/\/help/, this.onHelp);
         this.onText(/\/share/, this.onShare);
@@ -60,9 +57,13 @@ export default class DebtBot extends TelegramBot implements BotType {
         this.onText(debtRegexp, this.onDebt);
 
         this.on('inline_query', this.onInline);
+        this.on('chosen_inline_result', this.onChosenInlineResult);
+
+        this.dataBase.on('expired_offer', this.onExpiredOffer);
+
         this.on('callback_query', this.onButton);
 
-        this.setWebHook(`${this.url}/bot${this.token}`);
+        this.setWebHook(`${url}/bot${this.token}`);
     }
 
     async onStart(msg : TelegramBot.Message) : Promise<void> {
@@ -110,7 +111,7 @@ export default class DebtBot extends TelegramBot implements BotType {
     shareArticle() : TelegramBot.InlineQueryResultArticle {
         return {
             type: 'article',
-            id: String(this.nextArticleID()),
+            id: '0',
             title: UI.share.article.title(),
             input_message_content: {
                 message_text: UI.share.text(this.name)
@@ -194,7 +195,7 @@ export default class DebtBot extends TelegramBot implements BotType {
             await this.answerInlineQuery(query.id, [
                 answer_main,
                 answer_addend
-            ], { cache_time: 0 });
+            ]);
         } catch (error) {
             console.log(error);
         }
@@ -203,7 +204,7 @@ export default class DebtBot extends TelegramBot implements BotType {
     debtArticle(offer : TextedOffer) : TelegramBot.InlineQueryResultArticle {
         return {
             type: 'article',
-            id: String(this.nextArticleID()),
+            id: (offer.amount > 0 ? '+' : '') + String(offer.amount),
             title: UI.debt.article.title(offer.amount),
             input_message_content: {
                 message_text: UI.debt.text(
@@ -212,17 +213,19 @@ export default class DebtBot extends TelegramBot implements BotType {
                     offer.from
                 )
             },
-            reply_markup: UI.debt.article.keyboard(
-                this.cipher.encode(offer, true),
-                this.cipher.encode(offer, false)
-            )
+            reply_markup: UI.debt.article.keyboard()
         };
     }
 
     async onOfferClick(query : TelegramBot.CallbackQuery) : Promise<void> {
-        let offer = toOffer(this.cipher.decode(query.data));
-        offer.to = query.from.username;
         try {
+            let offer = toOffer(
+                await this.dataBase.getOffer(
+                    query.inline_message_id
+                ),
+                query.from.username,
+                query.data === '1'
+            );
             if (offer.to == offer.from) {
                 if (offer.accept) {
                     await this.answerCallbackQuery(
@@ -234,11 +237,17 @@ export default class DebtBot extends TelegramBot implements BotType {
                         UI.deal.cancel_text(offer.from),
                         { inline_message_id: query.inline_message_id }
                     );
+                    await this.dataBase.deleteOffer(
+                        query.inline_message_id
+                    );
                 }
             } else {
                 await this.editMessageText(
                     UI.deal.text(offer),
                     { inline_message_id: query.inline_message_id }
+                );
+                await this.dataBase.deleteOffer(
+                    query.inline_message_id
                 );
                 if (offer.accept)
                     await this.dataBase.saveDebt(offer);
@@ -263,6 +272,27 @@ export default class DebtBot extends TelegramBot implements BotType {
         } catch (error) {
             console.log(error);
         }
+    }
+
+    async onChosenInlineResult(result : TelegramBot.ChosenInlineResult) : Promise<void> {
+        if (result.query != '') try {
+            await this.dataBase.saveOffer(
+                result.inline_message_id,
+                {
+                    from   : result.from.username,
+                    amount : parseInt(result.result_id)
+                }
+            );
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async onExpiredOffer(id: string): Promise<void> {
+        await this.editMessageText(
+            UI.deal.expire_text(),
+            { inline_message_id: id }
+        );
     }
 
     async onButton(query : TelegramBot.CallbackQuery) : Promise<void> {
