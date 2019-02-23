@@ -56,7 +56,7 @@ export default class MyClient extends Client implements BotPostgreClient {
                 console.log('offer expired:', offer, '\non id =', id);
                 this.emit('expired_offer', id, offer);
             }
-        }, offerExpire);
+        }.bind(this), offerExpire);
     }
 
     async getOffer(id: string): Promise<OfferTemplate> {
