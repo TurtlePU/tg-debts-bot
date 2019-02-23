@@ -54,7 +54,6 @@ export default class MyClient extends Client implements BotPostgreClient {
             let deleted = await this.deleteOffer(id);
             if (deleted) {
                 console.log('offer expired:', offer, '\non id =', id);
-                console.log('emitting with', this);
                 this.emit('expired_offer', id, offer);
             }
         }, offerExpireTime);

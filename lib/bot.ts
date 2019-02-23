@@ -59,7 +59,7 @@ export default class DebtBot extends TelegramBot implements BotType {
         this.on('inline_query', this.onInline);
         this.on('chosen_inline_result', this.onChosenInlineResult);
 
-        this.dataBase.on('expired_offer', this.onExpiredOffer);
+        this.dataBase.on('expired_offer', (id, offer) => this.onExpiredOffer(id, offer));
 
         this.on('callback_query', this.onButton);
 
@@ -289,7 +289,6 @@ export default class DebtBot extends TelegramBot implements BotType {
     }
 
     async onExpiredOffer(id: string, offerTemplate : OfferTemplate): Promise<void> {
-        console.log('capturing with', this);
         await this.editMessageText(
             UI.deal.expire_text(offerTemplate),
             { inline_message_id: id }
