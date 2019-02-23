@@ -49,23 +49,28 @@ export default class MyClient extends Client implements BotPostgreClient {
                 ${offer.amount}
             )`
         );
+        console.log('saved offer:', offer, '\non id =', id);
         setTimeout(async () => {
             let deleted = await this.deleteOffer(id);
-            if (deleted)
-                this.emit('expired_offer', id);
+            if (deleted) {
+                console.log('offer expired:', offer, '\non id =', id);
+                this.emit('expired_offer', id, offer);
+            }
         }, offerExpire);
     }
 
     async getOffer(id: string): Promise<OfferTemplate> {
+        console.log('getting offer on id =', id);
         let query = await this.query(`
             select *
             from offr
-            where id = ${id}
+            where id = '${id}'
             limit 1`
         );
         if (query.rowCount === 0)
             throw new Error(`Offer not found. ID = ${id}`);
         let result = query.rows[0];
+        console.log('got offer:', result);
         return {
             from: result.from_name,
             amount: result.amount
@@ -73,11 +78,12 @@ export default class MyClient extends Client implements BotPostgreClient {
     }
 
     async deleteOffer(id: string): Promise<boolean> {
+        console.log('trying to delete offer on id =', id);
         let count = await this.unitQuery(`
             delete
             from offr
             as result
-            where id = ${id}`
+            where id = '${id}'`
         );
         return count !== 0;
     }
