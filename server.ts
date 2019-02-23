@@ -22,10 +22,10 @@ async function init() {
         const client = new DBClient(db_url);
         await client.start();
         const bot = new Bot({
-            token    : token,
-            port     : parseInt(port),
-            name     : name,
-            dataBase : client
+            token: token,
+            port:  parseInt(port),
+            name:  name,
+            dataBase: client
         });
         bot.start('https://' + url);
     } catch(error) {
