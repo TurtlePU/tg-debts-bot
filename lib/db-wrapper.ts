@@ -24,7 +24,7 @@ export default class MyClient extends Client implements BotPostgreClient {
         console.log('\nSuccessfully connected to database');
         await this.query(`
             create table if not exists stte(
-                id bigint primary key,
+                id integer primary key,
                 state smallint
             )`
         );
@@ -33,7 +33,7 @@ export default class MyClient extends Client implements BotPostgreClient {
             create table if not exists offr(
                 id varchar(255) primary key,
                 from_name varchar(32),
-                amount bigint,
+                amount integer,
                 make_time timestamp
             )`
         );
@@ -105,7 +105,7 @@ export default class MyClient extends Client implements BotPostgreClient {
         await this.query(`
             create table if not exists ${name}(
                 to_name varchar(32) primary key,
-                amount bigint
+                amount integer
             )`
         );
         console.log(`\nCreated table ${name} if not exists`);
