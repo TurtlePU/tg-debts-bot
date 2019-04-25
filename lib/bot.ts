@@ -44,27 +44,44 @@ export default class DebtBot extends TelegramBot implements BotType {
             }
         });
 
-        this.token    = options.token;
-        this.name     = options.name;
+        this.token = options.token;
+        this.name  = options.name;
+
         this.dataBase = options.dataBase;
     }
 
     async start(url: string): Promise<void> {
-        this.onText(/\/start/, this.onStart);
-        this.onText(/\/help/, this.onHelp);
-        this.onText(/\/share/, this.onShare);
-        this.onText(/\/stats/, this.onStats);
-        this.onText(debtRegexp, this.onDebt);
+        this.onText(/\/start/, (msg) => {
+            this.onStart(msg);
+        });
+        this.onText(/\/help/,  (msg) => {
+            this.onHelp(msg);
+        });
+        this.onText(/\/share/, (msg) => {
+            this.onShare(msg);
+        });
+        this.onText(/\/stats/, (msg) => {
+            this.onStats(msg);
+        });
+        this.onText(debtRegexp, (msg, match) => {
+            this.onDebt(msg, match);
+        });
 
-        this.on('inline_query', this.onInline);
-        this.on('chosen_inline_result', this.onChosenInlineResult);
+        this.on('inline_query', (query) => {
+            this.onInline(query);
+        });
+        this.on('chosen_inline_result', (result) => {
+            this.onChosenInlineResult(result)
+        });
 
         this.dataBase.on('expired_offer', (id, offer) => {
-            this.onExpiredOffer(id, offer)
+            this.onExpiredOffer(id, offer);
         });
         await this.dataBase.restartOffers();
 
-        this.on('callback_query', this.onButton);
+        this.on('callback_query', (query) => {
+            this.onButton(query)
+        });
 
         await this.setWebHook(`${url}/bot${this.token}`);
     }
