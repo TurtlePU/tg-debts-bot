@@ -256,7 +256,7 @@ export default class DebtBot extends TelegramBot implements BotType {
                     );
                 } else {
                     await this.editMessageText(
-                        UI.deal.cancel_text(offer.from),
+                        UI.deal.cancel_text(),
                         { inline_message_id: query.inline_message_id }
                     );
                     await this.dataBase.deleteOffer(

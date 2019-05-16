@@ -3,7 +3,15 @@ import util from './util';
 
 import Bot from 'node-telegram-bot-api';
 
-export default {
+const ok_sign = '✅';
+const no_sign = '❌';
+const money = '₽';
+
+function sign(ok: boolean) {
+    return ok ? ok_sign : no_sign;
+}
+
+const UI = {
     start: {
         text() {
             return `Привет! 👋\n`
@@ -21,11 +29,11 @@ export default {
                 + ` N [текст] — ты получил N 💰.\n`
                 + `-N [текст] — ты отдал N 💰.\n`
                 + `/stats — посмотреть свои долги.\n`
-                + `/share — поделиться этим 🤖.\n`
+                + `/share — поделиться этим ботом.\n`
                 + `/start — краткая справка.\n`
                 + `/help — это сообщение.\n\n`
                 + `Инлайн (@${name} + команда):\n\n`
-                + `пусто — поделиться этим 🤖.\n`
+                + `пусто — поделиться этим ботом.\n`
                 + ` N [текст] — ты получил 💰.\n`
                 + `-N [текст] — ты отдал 💰.`;
         }
@@ -41,7 +49,7 @@ export default {
             return {
                 reply_markup: {
                     inline_keyboard: [[{
-                        text: 'Поделиться 🤖',
+                        text: '🤖 Поделиться ботом',
                         switch_inline_query: ''
                     }]]
                 }
@@ -56,7 +64,7 @@ export default {
     stats: {
         text(table: StatsRow[]) {
             if (!table.length)
-                return 'Долгов нет 👏';
+                return '👏 Поздравляем, долгов нет!';
             let debts = table.filter(debt => debt.amount > 0);
             let owes = table.filter(debt => debt.amount < 0).map(util.lineAbs);
             return ''
@@ -65,13 +73,13 @@ export default {
                 + util.lineReduce(owes, 'Вам должны:\n');
         },
         callback_answer_text() {
-            return 'Обновлено.';
+            return '🔄 Обновлено';
         },
         keyboard(): Bot.SendMessageOptions {
             return {
                 reply_markup: {
                     inline_keyboard: [[{
-                        text: 'Обновить 🔄',
+                        text: '🔄 Обновить',
                         callback_data: 'update'
                     }]]
                 }
@@ -79,41 +87,46 @@ export default {
         }
     },
     debt: {
+        info(amount: number, hide?: boolean) {
+            let action = amount > 0 ? 'получил' : 'отдал';
+            let object = hide ? '💰' : (`${Math.abs(amount)} ${money}`);
+            return `Я ${action} ${object}`;
+        },
         text(text: string, amount: number) {
             if (text && (text.length > 1)) {
-                return text.substr(1)
-                    + `\n\n`
-                    + `‼️ ${amount > 0 ? 'хочет' : 'даёт'} ${Math.abs(amount)} ‼️`;
+                return '' 
+                    + `*${UI.debt.info(amount)}*`
+                    + `\n`
+                    + text.substr(1);
             } else {
-                return `Я ${amount > 0 ? 'хочу' : 'даю'}`
-                    + ` ${Math.abs(amount)}`;
+                return UI.debt.info(amount) + '.';
             }
         },
-        keyboard: function(
+        keyboard(
             text: string,
             amount: number
         ): Bot.SendMessageOptions {
             return {
                 reply_markup: {
                     inline_keyboard: [[{
-                        text: `Я ${amount < 0 ? 'отдал' : 'получил'} 💰`,
+                        text: UI.debt.info(amount, true),
                         switch_inline_query: `${amount}${text || ''}`
                     }]]
                 }
             };
         },
         amount_overflow_text: function(): string {
-            return '❌ Размер долга нереально большой ❌';
+            return `${no_sign} Долг слишком большой.`;
         },
         article: {
             title: function(amount: number): string {
-                return `${amount > 0 ? `Попросить` : `Предложить`} ${Math.abs(amount)}`;
+                return UI.debt.info(amount);
             },
             keyboard: function(): Bot.InlineKeyboardMarkup {
                 return {
                     inline_keyboard: [[
-                        { text: 'Ок 🌝', callback_data: '1' },
-                        { text: 'Не 🌚', callback_data: '0' }
+                        { text: '🌝 Ок', callback_data: '1' },
+                        { text: '🌚 Не', callback_data: '0' }
                     ]]
                 };
             }
@@ -121,22 +134,20 @@ export default {
     },
     deal: {
         text: function(offer: Offer): string {
-            let arg1 = offer.amount > 0
-                    ? `долга (кол-во: ${offer.amount})`
-                    : -offer.amount;
-            let arg2 = offer.accept
-                    ? `принято`
-                    : `отвергнуто`;
-            return `Предложение ${arg1} было ${arg2} @${offer.to}.`;
+            let person = offer.amount > 0 ? offer.from : offer.to;
+            let neg = offer.accept ? '' : 'не';
+            return `${sign(offer.accept)} @${person} ${neg} получил ${Math.abs(offer.amount)} ${money}.`;
         },
         self_accept_text: function(): string {
-            return 'Нельзя должать себе';
+            return `${no_sign} Нельзя должать себе`;
         },
-        cancel_text: function(owner: string): string {
-            return `Отменено @${owner}`;
+        cancel_text: function(): string {
+            return `${no_sign} Запрос отменен.`;
         },
         expire_text: function(offer: OfferTemplate): string {
-            return `Ожидание ${offer.amount} истекло`;
+            return `${no_sign} Время запроса истекло.`;
         }
     }
 };
+
+export default UI;
