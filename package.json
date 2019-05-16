@@ -27,6 +27,8 @@
     "pg": "^7.8.0"
   },
   "devDependencies": {
+    "@types/dotenv": "^6.1.1",
+    "dotenv": "^8.0.0",
     "nodemon": "^1.18.10",
     "tslint": "^5.12.1",
     "typescript": "^3.3.3"
