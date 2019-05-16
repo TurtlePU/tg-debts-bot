@@ -5,7 +5,7 @@ import Bot from 'node-telegram-bot-api';
 
 export default {
     start: {
-        text: function(): string {
+        text() {
             return `Привет! 👋\n`
                 + `Я — записная книжка долгов.\n\n`
                 + `💰 Чтобы попросить в долг, напиши сумму.\n\n`
@@ -15,29 +15,29 @@ export default {
         }
     },
     help: {
-        text: function(name: string): string {
+        text(name: string) {
             return ''
                 + `Команды ([текст] — по вкусу):\n\n`
-                + ` N [текст] — попросить N 💰.\n`
-                + `-N [текст] — предложить N 💰.\n`
+                + ` N [текст] — ты получил N 💰.\n`
+                + `-N [текст] — ты отдал N 💰.\n`
                 + `/stats — посмотреть свои долги.\n`
                 + `/share — поделиться этим 🤖.\n`
                 + `/start — краткая справка.\n`
                 + `/help — это сообщение.\n\n`
                 + `Инлайн (@${name} + команда):\n\n`
                 + `пусто — поделиться этим 🤖.\n`
-                + ` N [текст] — попросить 💰.\n`
-                + `-N [текст] — предложить 💰.`;
+                + ` N [текст] — ты получил 💰.\n`
+                + `-N [текст] — ты отдал 💰.`;
         }
     },
     share: {
-        text: function(name: string): string {
+        text(name: string) {
             return ''
                 + `Привет! 👋\n`
                 + `Я — Долгер (@${name}), записная книжка долгов.\n`
                 + `Ещё увидимся?`;
         },
-        keyboard: function(): Bot.SendMessageOptions {
+        keyboard(): Bot.SendMessageOptions {
             return {
                 reply_markup: {
                     inline_keyboard: [[{
@@ -48,13 +48,13 @@ export default {
             };
         }, 
         article: {
-            title: function(): string {
+            title() {
                 return 'Поделиться 🤖';
             }
         }
     },
     stats: {
-        text: function(table: StatsRow[]): string {
+        text(table: StatsRow[]) {
             if (!table.length)
                 return 'Долгов нет 👏';
             let debts = table.filter(debt => debt.amount > 0);
@@ -64,10 +64,10 @@ export default {
                 + (debts.length && owes.length ? '\n\n' : '')
                 + util.lineReduce(owes, 'Вам должны:\n');
         },
-        callback_answer_text: function(): string {
+        callback_answer_text() {
             return 'Обновлено.';
         },
-        keyboard: function(): Bot.SendMessageOptions {
+        keyboard(): Bot.SendMessageOptions {
             return {
                 reply_markup: {
                     inline_keyboard: [[{
@@ -79,10 +79,7 @@ export default {
         }
     },
     debt: {
-        text: function(
-            text:   string,
-            amount: number
-        ): string {
+        text(text: string, amount: number) {
             if (text && (text.length > 1)) {
                 return text.substr(1)
                     + `\n\n`
@@ -93,13 +90,13 @@ export default {
             }
         },
         keyboard: function(
-            text:   string,
+            text: string,
             amount: number
         ): Bot.SendMessageOptions {
             return {
                 reply_markup: {
                     inline_keyboard: [[{
-                        text: (amount < 0 ? 'Предложить' : 'Попросить') + ' 💰',
+                        text: `Я ${amount < 0 ? 'отдал' : 'получил'} 💰`,
                         switch_inline_query: `${amount}${text || ''}`
                     }]]
                 }

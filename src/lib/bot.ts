@@ -1,5 +1,5 @@
 import TelegramBot from 'node-telegram-bot-api';
-import UI  from './ui';
+import UI from './ui';
 
 const debtRegexp  = /(-?\d+)(.+)?/;
 const digitsLimit = 9;
