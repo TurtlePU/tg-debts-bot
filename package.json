@@ -21,15 +21,15 @@
   },
   "homepage": "https://github.com/PaulusUnexpendableTurtle/tg-debts-bot#readme",
   "dependencies": {
-    "@types/node-telegram-bot-api": "^0.30.4",
-    "@types/pg": "^7.4.13",
+    "dotenv": "^8.0.0",
     "node-telegram-bot-api": "^0.30.0",
     "pg": "^7.8.0",
     "typescript": "^3.4.5"
   },
   "devDependencies": {
     "@types/dotenv": "^6.1.1",
-    "dotenv": "^8.0.0",
+    "@types/node-telegram-bot-api": "^0.30.4",
+    "@types/pg": "^7.4.14",
     "nodemon": "^1.18.10",
     "tslint": "^5.12.1"
   }
