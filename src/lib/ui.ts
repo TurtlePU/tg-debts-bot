@@ -138,8 +138,8 @@ export default {
     deal: {
         text(from: string, amount: number, to: string, accept: boolean) {
             let person = amount > 0 ? from : to;
-            let neg = accept ? '' : 'не';
-            return `${sign(accept)} @${person} ${neg} получил ${Math.abs(amount)} ${money}.`;
+            let neg = accept ? '' : 'не ';
+            return `${sign(accept)} @${person} ${neg}получил ${Math.abs(amount)} ${money}.`;
         },
         self_accept_text() {
             return error_text('Нельзя должать себе');
