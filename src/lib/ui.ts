@@ -88,7 +88,7 @@ const UI = {
     },
     debt: {
         info(amount: number, hide?: boolean) {
-            let action = amount > 0 ? 'получил' : 'отдал';
+            let action = amount > 0 ? 'взял в долг' : 'отдал';
             let object = hide ? '💰' : (`${Math.abs(amount)} ${money}`);
             return `Я ${action} ${object}`;
         },
@@ -120,7 +120,7 @@ const UI = {
         },
         article: {
             title: function(amount: number): string {
-                return UI.debt.info(amount);
+                return `${amount > 0 ? 'Взять в долг' : 'Отдать'} ${Math.abs(amount)} ${money}`;
             },
             keyboard: function(): Bot.InlineKeyboardMarkup {
                 return {
