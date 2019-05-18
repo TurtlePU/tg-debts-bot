@@ -130,8 +130,7 @@ export default class DebtBot extends TelegramBot {
                 msg.chat.id,
                 UI.stats.text(stats),
                 {
-                    ...UI.stats.keyboard(),
-                    parse_mode: 'Markdown'
+                    ...UI.stats.keyboard()
                 }
             );
         } catch(error) {
