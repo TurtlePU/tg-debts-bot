@@ -1,6 +1,6 @@
 import http from 'http';
 
-import Bot      from './lib/bot';
+import Bot from './lib/bot';
 import DBClient from './lib/db-wrapper';
 
 // Use .env config if present
@@ -10,8 +10,8 @@ dotenv.config();
 const token  = process.env.TG_BOT_TOKEN;            // your token
 const db_url = process.env.DATABASE_URL;            // PostgreSQL connection string
 const url    = process.env.APP_URL;                 // server url
-const port   = process.env.PORT     || '8080';      // port to listen to connections
 const name   = process.env.BOT_NAME || 'debt_bot';  // goes after @, between 5 & 32 chars long
+const port   = +process.env.PORT || 8080;
 
 console.log(
     '\nTG_BOT_TOKEN :', token,
@@ -22,13 +22,10 @@ console.log(
 );
 
 async function init() {
-    const client = new DBClient(db_url);
-    await client.start();
+    const dataBase = new DBClient(db_url);
+    await dataBase.start();
     const bot = new Bot({
-        token: token,
-        port: +port,
-        name:  name,
-        dataBase: client
+        token, name, port, dataBase
     });
     await bot.start('https://' + url);
 };

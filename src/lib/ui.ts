@@ -1,20 +1,12 @@
-import { StatsRow, Offer, OfferTemplate } from './common_types';
-import util from './util';
-
 import Bot from 'node-telegram-bot-api';
 
-const ok_sign = '✅';
-const no_sign = '❌';
 const money = '₽';
 
-function sign(ok: boolean) {
-    return ok ? ok_sign : no_sign;
-}
-
-const UI = {
+export default {
     start: {
         text() {
-            return `Привет! 👋\n`
+            return ''
+                + `Привет! 👋\n`
                 + `Я — записная книжка долгов.\n\n`
                 + `💰 Чтобы попросить в долг, напиши сумму.\n\n`
                 + `🗄 Чтобы посмотреть свои долги, напиши /stats.\n\n`
@@ -62,15 +54,31 @@ const UI = {
         }
     },
     stats: {
-        text(table: StatsRow[]) {
-            if (!table.length)
+        text(table: { to: string, amount: number }[]) {
+            if (!table.length) {
                 return '👏 Поздравляем, долгов нет!';
-            let debts = table.filter(debt => debt.amount > 0);
-            let owes = table.filter(debt => debt.amount < 0).map(util.lineAbs);
-            return ''
-                + util.lineReduce(debts, 'Вы должны:\n')
-                + (debts.length && owes.length ? '\n\n' : '')
-                + util.lineReduce(owes, 'Вам должны:\n');
+            }
+
+            let debts = table
+                .filter(debt => debt.amount > 0)
+                .map(line => `@${line.to}: ${line.amount}`)
+            let debts_string = debts
+                .reduce((res, line) => `${res}\n${line}`, 'Вы должны:\n\n');
+
+            let owes = table
+                .filter(debt => debt.amount < 0)
+                .map(line => `@${line.to}: ${-line.amount}`);
+            let owes_string = owes
+                .reduce((res, line) => `${res}\n${line}`, 'Вам должны:\n\n');
+
+            switch (table.length) {
+                case owes.length:
+                    return owes_string;
+                case debts.length:
+                    return debts_string;
+                default:
+                    return `${debts_string}\n\n${owes_string}`;
+            }
         },
         callback_answer_text() {
             return '🔄 Обновлено';
@@ -87,19 +95,14 @@ const UI = {
         }
     },
     debt: {
-        info(amount: number, hide?: boolean) {
-            let action = amount > 0 ? 'взял в долг' : 'отдал';
-            let object = hide ? '💰' : (`${Math.abs(amount)} ${money}`);
-            return `Я ${action} ${object}`;
-        },
         text(text: string, amount: number) {
             if (text && (text.length > 1)) {
                 return '' 
-                    + `*${UI.debt.info(amount)}*`
+                    + `*${debt_info(amount)}*`
                     + `\n`
                     + text.substr(1);
             } else {
-                return UI.debt.info(amount) + '.';
+                return debt_info(amount) + '.';
             }
         },
         keyboard(
@@ -109,20 +112,20 @@ const UI = {
             return {
                 reply_markup: {
                     inline_keyboard: [[{
-                        text: UI.debt.info(amount, true),
+                        text: debt_info(amount, true),
                         switch_inline_query: `${amount}${text || ''}`
                     }]]
                 }
             };
         },
-        amount_overflow_text: function(): string {
-            return `${no_sign} Долг слишком большой.`;
+        amount_overflow_text() {
+            return error_text('Долг слишком большой.');
         },
         article: {
-            title: function(amount: number): string {
+            title(amount: number) {
                 return `${amount > 0 ? 'Взять в долг' : 'Отдать'} ${Math.abs(amount)} ${money}`;
             },
-            keyboard: function(): Bot.InlineKeyboardMarkup {
+            keyboard(): Bot.InlineKeyboardMarkup {
                 return {
                     inline_keyboard: [[
                         { text: '🌝 Ок', callback_data: '1' },
@@ -133,21 +136,33 @@ const UI = {
         }
     },
     deal: {
-        text: function(offer: Offer): string {
-            let person = offer.amount > 0 ? offer.from : offer.to;
-            let neg = offer.accept ? '' : 'не';
-            return `${sign(offer.accept)} @${person} ${neg} получил ${Math.abs(offer.amount)} ${money}.`;
+        text(from: string, amount: number, to: string, accept: boolean) {
+            let person = amount > 0 ? from : to;
+            let neg = accept ? '' : 'не';
+            return `${sign(accept)} @${person} ${neg} получил ${Math.abs(amount)} ${money}.`;
         },
-        self_accept_text: function(): string {
-            return `${no_sign} Нельзя должать себе`;
+        self_accept_text() {
+            return error_text('Нельзя должать себе');
         },
-        cancel_text: function(): string {
-            return `${no_sign} Запрос отменен.`;
+        cancel_text() {
+            return error_text('Запрос отменен.');
         },
-        expire_text: function(offer: OfferTemplate): string {
-            return `${no_sign} Время запроса истекло.`;
+        expire_text() {
+            return error_text('Время запроса истекло.');
         }
     }
 };
 
-export default UI;
+function debt_info(amount: number, hide?: boolean) {
+    let action = amount > 0 ? 'взял в долг' : 'отдал';
+    let object = hide ? '💰' : (`${Math.abs(amount)} ${money}`);
+    return `Я ${action} ${object}`;
+}
+
+function error_text(text: string) {
+    return '❌ ' + text;
+}
+
+function sign(ok: boolean) {
+    return ok ? '✅' : '❌';
+}
