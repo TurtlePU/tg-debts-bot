@@ -63,13 +63,13 @@ export default {
                 .filter(debt => debt.amount > 0)
                 .map(line => `@${line.to}: ${line.amount}`)
             let debts_string = debts
-                .reduce((res, line) => `${res}\n${line}`, 'Вы должны:\n\n');
+                .reduce((res, line) => `${res}\n${line}`, 'Вы должны:\n');
 
             let owes = table
                 .filter(debt => debt.amount < 0)
                 .map(line => `@${line.to}: ${-line.amount}`);
             let owes_string = owes
-                .reduce((res, line) => `${res}\n${line}`, 'Вам должны:\n\n');
+                .reduce((res, line) => `${res}\n${line}`, 'Вам должны:\n');
 
             switch (table.length) {
                 case owes.length:
