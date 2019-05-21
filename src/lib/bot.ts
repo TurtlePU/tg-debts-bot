@@ -242,7 +242,6 @@ export default class DebtBot extends TelegramBot {
                         UI.deal.cancel_text(),
                         {
                             inline_message_id: query.inline_message_id,
-                            parse_mode: 'Markdown'
                         }
                     );
                     await this.dataBase.deleteOffer(
@@ -253,8 +252,7 @@ export default class DebtBot extends TelegramBot {
                 await this.editMessageText(
                     UI.deal.text(from, amount, to, accept),
                     {
-                        inline_message_id: query.inline_message_id,
-                        parse_mode: 'Markdown'
+                        inline_message_id: query.inline_message_id
                     }
                 );
                 await this.dataBase.deleteOffer(
@@ -308,7 +306,6 @@ export default class DebtBot extends TelegramBot {
             UI.deal.expire_text(),
             {
                 inline_message_id: id,
-                parse_mode: 'Markdown'
             }
         );
     }
