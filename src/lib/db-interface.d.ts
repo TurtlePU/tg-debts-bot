@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 
-export interface DB_Client extends EventEmitter {
+interface DB_Client extends EventEmitter {
     start(): Promise<this>
     restartOffers(): Promise<void>
     saveOffer(id: string, offer: Offer): Promise<void>
@@ -8,14 +8,14 @@ export interface DB_Client extends EventEmitter {
     deleteOffer(id: string): Promise<boolean>
     saveDebt(from: string, amount: number, to: string): Promise<void>
     getStats(name: string): Promise<Row[]>
-};
+}
 
-export type Offer = {
+type Offer = {
     from: string
     amount: number
 }
 
-export type Row = {
+type Row = {
     to: string
     amount: number
 }
