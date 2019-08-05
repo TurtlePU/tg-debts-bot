@@ -4,5 +4,8 @@ node_modules/
 # editor preferencies
 .vscode/
 
+# tsc output (commit in build instead)
+dist/
+
 # private debug environment
 .env
