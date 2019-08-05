@@ -4,5 +4,8 @@ node_modules/
 # editor preferencies
 .vscode/
 
+# source code (commit in dev instead)
+src/
+
 # private debug environment
 .env

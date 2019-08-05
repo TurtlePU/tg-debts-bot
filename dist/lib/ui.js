@@ -1,8 +1,7 @@
-import Bot from 'node-telegram-bot-api';
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const money = '₽';
-
-export default {
+exports.default = {
     start: {
         text() {
             return ''
@@ -15,7 +14,7 @@ export default {
         }
     },
     help: {
-        text(name: string) {
+        text(name) {
             return ''
                 + `Команды ([текст] — по вкусу):\n\n`
                 + ` N [текст] — ты получил N 💰.\n`
@@ -31,22 +30,22 @@ export default {
         }
     },
     share: {
-        text(name: string) {
+        text(name) {
             return ''
                 + `Привет! 👋\n`
                 + `Я — Долгер (@${name}), записная книжка долгов.\n`
                 + `Ещё увидимся?`;
         },
-        keyboard(): Bot.SendMessageOptions {
+        keyboard() {
             return {
                 reply_markup: {
                     inline_keyboard: [[{
-                        text: '🤖 Поделиться ботом',
-                        switch_inline_query: ''
-                    }]]
+                                text: '🤖 Поделиться ботом',
+                                switch_inline_query: ''
+                            }]]
                 }
             };
-        }, 
+        },
         article: {
             title() {
                 return 'Поделиться 🤖';
@@ -54,23 +53,20 @@ export default {
         }
     },
     stats: {
-        text(table: { to: string, amount: number }[]) {
+        text(table) {
             if (!table.length) {
                 return '👏 Поздравляем, долгов нет!';
             }
-
             let debts = table
                 .filter(debt => debt.amount > 0)
-                .map(line => `@${line.to}: ${line.amount}`)
+                .map(line => `@${line.to}: ${line.amount}`);
             let debts_string = debts
                 .reduce((res, line) => `${res}\n${line}`, 'Вы должны:\n');
-
             let owes = table
                 .filter(debt => debt.amount < 0)
                 .map(line => `@${line.to}: ${-line.amount}`);
             let owes_string = owes
                 .reduce((res, line) => `${res}\n${line}`, 'Вам должны:\n');
-
             switch (table.length) {
                 case owes.length:
                     return owes_string;
@@ -83,38 +79,36 @@ export default {
         callback_answer_text() {
             return '🔄 Обновлено';
         },
-        keyboard(): Bot.SendMessageOptions {
+        keyboard() {
             return {
                 reply_markup: {
                     inline_keyboard: [[{
-                        text: '🔄 Обновить',
-                        callback_data: 'update'
-                    }]]
+                                text: '🔄 Обновить',
+                                callback_data: 'update'
+                            }]]
                 }
             };
         }
     },
     debt: {
-        text(text: string, amount: number) {
+        text(text, amount) {
             if (text && (text.length > 1)) {
-                return '' 
+                return ''
                     + `*${debt_info(amount)}*`
                     + `\n`
                     + text.substr(1);
-            } else {
+            }
+            else {
                 return debt_info(amount) + '.';
             }
         },
-        keyboard(
-            text: string,
-            amount: number
-        ): Bot.SendMessageOptions {
+        keyboard(text, amount) {
             return {
                 reply_markup: {
                     inline_keyboard: [[{
-                        text: debt_info(amount, true),
-                        switch_inline_query: `${amount}${text || ''}`
-                    }]]
+                                text: debt_info(amount, true),
+                                switch_inline_query: `${amount}${text || ''}`
+                            }]]
                 }
             };
         },
@@ -122,21 +116,21 @@ export default {
             return error_text('Долг слишком большой.');
         },
         article: {
-            title(amount: number) {
+            title(amount) {
                 return `${amount > 0 ? 'Взять в долг' : 'Отдать'} ${Math.abs(amount)} ${money}`;
             },
-            keyboard(): Bot.InlineKeyboardMarkup {
+            keyboard() {
                 return {
                     inline_keyboard: [[
-                        { text: '🌝 Ок', callback_data: '1' },
-                        { text: '🌚 Не', callback_data: '0' }
-                    ]]
+                            { text: '🌝 Ок', callback_data: '1' },
+                            { text: '🌚 Не', callback_data: '0' }
+                        ]]
                 };
             }
         }
     },
     deal: {
-        text(from: string, amount: number, to: string, accept: boolean) {
+        text(from, amount, to, accept) {
             let person = amount > 0 ? from : to;
             let neg = accept ? '' : 'не ';
             return `${sign(accept)} @${person} ${neg}получил ${Math.abs(amount)} ${money}.`;
@@ -152,17 +146,14 @@ export default {
         }
     }
 };
-
-function debt_info(amount: number, hide?: boolean) {
+function debt_info(amount, hide) {
     let action = amount > 0 ? 'взял в долг' : 'отдал';
     let object = hide ? '💰' : (`${Math.abs(amount)} ${money}`);
     return `Я ${action} ${object}`;
 }
-
-function error_text(text: string) {
+function error_text(text) {
     return '❌ ' + text;
 }
-
-function sign(ok: boolean) {
+function sign(ok) {
     return ok ? '✅' : '❌';
 }
