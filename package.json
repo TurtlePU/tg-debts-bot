@@ -4,7 +4,7 @@
   "description": "tg bot which holds you in course of your debts",
   "main": "dist/server.js",
   "scripts": {
-    "prestart": "tsc",
+    "build": "tsc",
     "start": "node dist/server.js"
   },
   "repository": {
@@ -18,12 +18,14 @@
   },
   "homepage": "https://github.com/PaulusUnexpendableTurtle/tg-debts-bot#readme",
   "dependencies": {
+    "dotenv": "^8.0.0",
+    "node-telegram-bot-api": "^0.30.0",
+    "pg": "^7.8.0"
+  },
+  "devDependencies": {
     "@types/dotenv": "^6.1.1",
     "@types/node-telegram-bot-api": "^0.31.0",
     "@types/pg": "^7.4.14",
-    "dotenv": "^8.0.0",
-    "node-telegram-bot-api": "^0.30.0",
-    "pg": "^7.8.0",
-    "typescript": "^3.4.5"
+    "typescript": "^3.5.3"
   }
 }

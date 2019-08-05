@@ -1,9 +1,6 @@
 # dependencies
 node_modules/
 
-# tsc output
-dist/
-
 # editor preferencies
 .vscode/
 
