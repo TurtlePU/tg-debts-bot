@@ -1,5 +1,7 @@
 import Bot from 'node-telegram-bot-api';
 
+import { User } from './user';
+
 const money = '₽';
 
 export default {
@@ -54,20 +56,20 @@ export default {
         }
     },
     stats: {
-        text(table: { to: string, amount: number }[]) {
+        text(table: { to: User, amount: number }[]) {
             if (!table.length) {
                 return '👏 Поздравляем, долгов нет!';
             }
 
             let debts = table
                 .filter(debt => debt.amount > 0)
-                .map(line => `@${line.to}: ${line.amount}`)
+                .map(line => `${name(line.to)}: ${line.amount}`)
             let debts_string = debts
                 .reduce((res, line) => `${res}\n${line}`, 'Вы должны:\n');
 
             let owes = table
                 .filter(debt => debt.amount < 0)
-                .map(line => `@${line.to}: ${-line.amount}`);
+                .map(line => `${name(line.to)}: ${-line.amount}`);
             let owes_string = owes
                 .reduce((res, line) => `${res}\n${line}`, 'Вам должны:\n');
 
@@ -136,10 +138,10 @@ export default {
         }
     },
     deal: {
-        text(from: string, amount: number, to: string, accept: boolean) {
-            let person = amount > 0 ? from : to;
+        text(from: User, amount: number, to: User, accept: boolean) {
+            let person = name(amount > 0 ? from : to);
             let neg = accept ? '' : 'не ';
-            return `${sign(accept)} @${person} ${neg}получил ${Math.abs(amount)} ${money}.`;
+            return `${sign(accept)} ${person} ${neg}получил ${Math.abs(amount)} ${money}.`;
         },
         self_accept_text() {
             return error_text('Нельзя должать себе');
@@ -157,6 +159,10 @@ function debt_info(amount: number, hide?: boolean) {
     let action = amount > 0 ? 'взял в долг' : 'отдал';
     let object = hide ? '💰' : (`${Math.abs(amount)} ${money}`);
     return `Я ${action} ${object}`;
+}
+
+function name(user: User) {
+    return user.username ? `@${user.username}` : user.full_name;
 }
 
 function error_text(text: string) {

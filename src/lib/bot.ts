@@ -2,6 +2,7 @@ import TelegramBot from 'node-telegram-bot-api';
 
 import { DB_Client } from './db-interface';
 import UI from './ui';
+import { User } from './user';
 
 const debtRegexp  = /(-?\d+)(.+)?/;
 const digitsLimit = 9;
@@ -125,7 +126,7 @@ export default class DebtBot extends TelegramBot {
 
     private async onStats(msg: TelegramBot.Message): Promise<void> {
         try {
-            let stats = await this.dataBase.getStats(msg.from.username);
+            let stats = await this.dataBase.getStats(user(msg.from));
             await this.sendMessage(
                 msg.chat.id,
                 UI.stats.text(stats),
@@ -140,7 +141,7 @@ export default class DebtBot extends TelegramBot {
 
     private async updateStats(query: TelegramBot.CallbackQuery): Promise<void> {
         try {
-            let stats = await this.dataBase.getStats(query.from.username);
+            let stats = await this.dataBase.getStats(user(query.from));
             await Promise.all([
                 this.deleteMessage(
                     query.message.chat.id,
@@ -229,9 +230,9 @@ export default class DebtBot extends TelegramBot {
             let { from, amount } = await this.dataBase.getOffer(
                 query.inline_message_id
             );
-            let to = query.from.username;
+            let to = query.from.id.toString();
             let accept = query.data == '1';
-            if (to == from) {
+            if (to == from.id) {
                 if (accept) {
                     await this.answerCallbackQuery(
                         query.id,
@@ -251,7 +252,7 @@ export default class DebtBot extends TelegramBot {
                 }
             } else {
                 await this.editMessageText(
-                    UI.deal.text(from, amount, to, accept),
+                    UI.deal.text(from, amount, user(query.from), accept),
                     {
                         inline_message_id: query.inline_message_id,
                         parse_mode: 'Markdown'
@@ -261,7 +262,7 @@ export default class DebtBot extends TelegramBot {
                     query.inline_message_id
                 );
                 if (accept) {
-                    await this.dataBase.saveDebt(from, amount, to);
+                    await this.dataBase.saveDebt(from, amount, user(query.from));
                 }
             }
         } catch (error) {
@@ -293,7 +294,7 @@ export default class DebtBot extends TelegramBot {
                 await this.dataBase.saveOffer(
                     result.inline_message_id,
                     {
-                        from: result.from.username,
+                        from: user(result.from),
                         amount: +result.result_id
                     }
                 );
@@ -320,6 +321,17 @@ export default class DebtBot extends TelegramBot {
             await this.onOfferClick(query);
         }
     }
+}
+
+function user(user: TelegramBot.User): User {
+    let result = {
+        id: user.id.toString(),
+        full_name: user.first_name + ' ' + user.last_name
+    } as User;
+    if (user.username) {
+        result.username = user.username;
+    }
+    return result;
 }
 
 type BotOptions = {
