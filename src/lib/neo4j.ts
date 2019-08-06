@@ -142,16 +142,14 @@ export default class Neo4jClient extends EventEmitter implements DB_Client {
     }
 
     async getStats(user: User): Promise<Row[]> {
+        await this.updateUser(user);
         return (await this.session.run(`
             MATCH (self: User) -[record:OWES]- (other: User)
             WHERE user.id = {id}
             RETURN CASE WHEN startNode(record) = self
                 THEN record.amount AS amount, other AS to
                 ELSE -record.amount AS amount, other AS to
-            `,
-            {
-                id: user.id
-            }
+            `, { id: user.id }
         )).records.map(record => ({
             amount: (record.get('amount') as neo4j.Integer).toNumber(),
             to: get_user((record.get('to') as neo4j.Node).properties)
