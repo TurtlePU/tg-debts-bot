@@ -3,9 +3,9 @@ import { EventEmitter } from 'events';
 import { User } from './user';
 
 export interface DB_Client extends EventEmitter {
-    start(): Promise<this>
-
+    start(): Promise<void>
     restartOffers(): Promise<void>
+
     saveOffer(id: string, offer: Offer): Promise<void>
     getOffer(id: string): Promise<Offer>
     deleteOffer(id: string): Promise<boolean>
